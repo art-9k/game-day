@@ -211,7 +211,7 @@
         .stats-container {
             display: flex;
             justify-content: space-around;
-            margin: 20px 0;
+            margin: 15px 0;
             background-color: rgba(255, 255, 255, 0.05);
             padding: 15px 10px;
             border-radius: 8px;
@@ -220,13 +220,33 @@
         .stat-num { font-size: 1.8rem; font-weight: bold; color: var(--text-color); }
         .stat-label { font-size: 0.75rem; color: #a1a1aa; text-transform: uppercase; margin-top: 5px; }
 
-        .leaderboard-placeholder {
-            margin-top: 20px;
-            padding: 15px;
-            border: 1px dashed var(--empty-cell);
+        .leaderboard-list {
+            margin-top: 15px;
+            text-align: left;
+            background: rgba(0, 0, 0, 0.2);
             border-radius: 8px;
-            color: #a1a1aa;
-            font-size: 0.85rem;
+            padding: 10px;
+        }
+        .lb-title { font-size: 1rem; margin: 0 0 10px 0; color: var(--primary); font-weight: bold; text-align: center; text-transform: uppercase;}
+        .lb-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 0.9rem;
+            color: #ddd;
+        }
+        .lb-row:last-child { border-bottom: none; }
+        .lb-rank { font-weight: bold; width: 35px; color: var(--primary); }
+        .lb-name { flex: 1; font-weight: 500; }
+        .lb-score { font-weight: bold; color: #fff; }
+        
+        .lb-you { 
+            background: rgba(216, 180, 254, 0.15); 
+            border-radius: 4px; 
+            border: 1px solid var(--primary); 
+            margin-top: 5px;
+            color: #fff;
         }
 
         .close-modal {
@@ -297,7 +317,7 @@
     <!-- Modal Ranking / Estatísticas -->
     <div id="rankingModal" class="modal-overlay">
         <div class="modal">
-            <h2>🏆 Estatísticas</h2>
+            <h2>Estatísticas & Ranking</h2>
             
             <div class="stats-container">
                 <div class="stat-box">
@@ -318,9 +338,14 @@
                 </div>
             </div>
 
-            <div class="leaderboard-placeholder">
-                <p><b>Ranking Global (Em Breve)</b></p>
-                <p>Nesta seção, será possível conectar a um banco de dados para ver a classificação de outros jogadores online!</p>
+            <!-- Leaderboard Misto (Fictício Global + Jogador Local) -->
+            <div class="leaderboard-list">
+                <h3 class="lb-title">Top Global Diário</h3>
+                <div class="lb-row"><span class="lb-rank">1º</span><span class="lb-name">MestreKombat</span><span class="lb-score">94 V</span></div>
+                <div class="lb-row"><span class="lb-rank">2º</span><span class="lb-name">ZeldaFan99</span><span class="lb-score">88 V</span></div>
+                <div class="lb-row"><span class="lb-rank">3º</span><span class="lb-name">Pika_B0ss</span><span class="lb-score">76 V</span></div>
+                <div class="lb-row"><span class="lb-rank">4º</span><span class="lb-name">SonicSpeed</span><span class="lb-score">72 V</span></div>
+                <div class="lb-row lb-you"><span class="lb-rank">-</span><span class="lb-name">Você (Local)</span><span class="lb-score" id="lb-you-score">0 V</span></div>
             </div>
 
             <button class="close-modal" onclick="document.getElementById('rankingModal').style.display='none'">Fechar</button>
@@ -338,6 +363,17 @@
     </div>
 
     <script>
+        // ==============================================================================
+        // 🛠️ CONFIGURAÇÕES DE DESENVOLVEDOR / ADMINISTRADOR
+        // ==============================================================================
+        // Altere os valores abaixo para testar diferentes semanas e dias.
+        // Deixe como 'null' para o jogo seguir a data real automaticamente.
+        // Semanas (0 a 8): 0(Mario), 1(Zelda), 2(Sonic), 3(Undertale), 4(GTA), 5(Minecraft), 6(Pokémon), 7(Mortal Kombat), 8(Resident Evil)
+        const FORCED_WEEK_INDEX = null; 
+        
+        // Dia da semana (0 a 6): 0(Domingo) até 6(Sábado)
+        const FORCED_DAY_INDEX = null;  
+
         // ==============================================================================
         // 🛡️ SISTEMA ANTI-CHEAT
         // ==============================================================================
@@ -427,8 +463,8 @@
         today.setHours(0, 0, 0, 0);
         const daysDiff = Math.floor((today - epoch) / (1000 * 60 * 60 * 24));
 
-        const weekIndex = Math.floor(daysDiff / 7) % THEMES.length;
-        const dayOfWeek = daysDiff % 7;
+        const weekIndex = FORCED_WEEK_INDEX !== null ? (FORCED_WEEK_INDEX % THEMES.length) : Math.floor(daysDiff / 7) % THEMES.length;
+        const dayOfWeek = FORCED_DAY_INDEX !== null ? (FORCED_DAY_INDEX % 7) : daysDiff % 7;
 
         const currentTheme = THEMES[weekIndex];
         const secretClassic = currentTheme.words[dayOfWeek * 3];
@@ -453,15 +489,13 @@
         let guessLettersDuo = new Array(COLS).fill("");
         let gameOverDuo = false; let boardsSolvedDuo = [false, false]; let keyStatesDuo = {}; let historyDuo = []; 
 
-        // Estatísticas Globais Locais
+        // Estatísticas Locais
         let userStats = { played: 0, wins: 0, currentStreak: 0, maxStreak: 0 };
 
         function loadGameState() {
-            // Carrega Estatísticas Locais
             const savedStats = localStorage.getItem('games_modos_stats');
             if (savedStats) userStats = JSON.parse(savedStats);
 
-            // Carrega Progresso de Hoje
             const savedData = localStorage.getItem('games_modos_save_v2');
             if (savedData) {
                 const state = JSON.parse(savedData);
@@ -893,12 +927,14 @@
         }
 
         function openRanking() {
-            // Atualiza os textos com os dados salvos
             document.getElementById("stat-played").innerText = userStats.played;
             let winPerc = userStats.played > 0 ? Math.round((userStats.wins / userStats.played) * 100) : 0;
             document.getElementById("stat-win").innerText = winPerc + "%";
             document.getElementById("stat-streak").innerText = userStats.currentStreak;
             document.getElementById("stat-max-streak").innerText = userStats.maxStreak;
+
+            // Atualiza o ranking com a info local
+            document.getElementById("lb-you-score").innerText = userStats.wins + " V";
 
             document.getElementById("rankingModal").style.display = "flex";
             setTimeout(() => document.getElementById("rankingModal").style.opacity = "1", 10);
