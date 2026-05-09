@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Game do Dia | Clássico & Duo</title>
     <style>
         :root {
@@ -27,11 +27,11 @@
             flex-direction: column;
             align-items: center;
             margin: 0;
-            min-height: 100vh;
-            height: auto;
+            /* 100dvh resolve o problema do teclado nativo escondendo itens */
+            min-height: 100dvh;
             overflow-y: auto;
             overflow-x: hidden;
-            padding-bottom: 20px;
+            padding-bottom: 10px;
             justify-content: space-between;
             transition: background-color 0.8s ease;
             user-select: none;
@@ -39,7 +39,7 @@
 
         header {
             text-align: center;
-            padding: 10px 0;
+            padding: 5px 0;
             width: 100%;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             display: flex;
@@ -59,13 +59,13 @@
 
         .help-btn {
             position: absolute;
-            right: 20px;
+            right: 15px;
             background: none;
             border: 2px solid var(--primary);
             color: var(--primary);
             border-radius: 50%;
-            width: 30px;
-            height: 30px;
+            width: 28px;
+            height: 28px;
             font-weight: bold;
             cursor: pointer;
             display: flex;
@@ -81,7 +81,7 @@
 
         header h1 {
             margin: 0;
-            font-size: 2rem;
+            font-size: clamp(1.5rem, 5vw, 2rem);
             letter-spacing: 2px;
             color: var(--primary);
             text-shadow: 0 0 15px var(--primary);
@@ -93,9 +93,9 @@
             background-color: rgba(255, 255, 255, 0.05);
             color: var(--primary);
             border: 1px solid var(--primary);
-            padding: 5px 15px;
+            padding: 3px 12px;
             border-radius: 15px;
-            font-size: 0.9rem;
+            font-size: clamp(0.75rem, 3vw, 0.9rem);
             font-weight: bold;
             margin-top: 5px;
             letter-spacing: 1px;
@@ -107,7 +107,7 @@
             display: flex;
             background-color: rgba(0, 0, 0, 0.3);
             border-radius: 20px;
-            margin-top: 10px;
+            margin-top: 5px;
             padding: 3px;
         }
 
@@ -115,8 +115,8 @@
             background: transparent;
             border: none;
             color: #a1a1aa;
-            padding: 5px 20px;
-            font-size: 0.9rem;
+            padding: 5px 15px;
+            font-size: clamp(0.8rem, 3vw, 0.9rem);
             font-weight: bold;
             border-radius: 15px;
             cursor: pointer;
@@ -134,6 +134,8 @@
             width: 100%;
             flex-direction: column;
             align-items: center;
+            flex: 1;
+            justify-content: center;
         }
 
         .game-container.active {
@@ -144,21 +146,21 @@
             display: grid;
             grid-template-rows: repeat(6, 1fr);
             grid-gap: 5px;
-            padding: 10px;
+            padding: 5px;
             max-width: 400px;
         }
 
         #duo-boards-container {
             display: flex;
-            gap: 15px;
-            padding: 10px;
+            gap: 10px;
+            padding: 5px;
             max-width: 700px;
             flex-wrap: nowrap;
         }
 
         .board {
             display: grid;
-            grid-gap: 5px;
+            grid-gap: 4px;
             flex: 1;
         }
 
@@ -169,7 +171,7 @@
         .row {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
-            grid-gap: 5px;
+            grid-gap: 4px;
             justify-content: center;
         }
 
@@ -185,15 +187,15 @@
         }
 
         .classic-cell {
-            width: clamp(45px, 12vw, 60px);
-            height: clamp(45px, 12vw, 60px);
+            width: clamp(35px, 12vw, 60px);
+            height: clamp(35px, 12vw, 60px);
             font-size: clamp(1.5rem, 6vw, 2rem);
         }
 
         .duo-cell {
-            width: clamp(28px, 8vw, 50px);
-            height: clamp(28px, 8vw, 50px);
-            font-size: clamp(1.2rem, 5vw, 1.6rem);
+            width: clamp(24px, 8vw, 50px);
+            height: clamp(24px, 8vw, 50px);
+            font-size: clamp(1rem, 4vw, 1.6rem);
         }
 
         .cell.active-cursor {
@@ -242,15 +244,15 @@
             max-width: 550px;
             display: flex;
             flex-direction: column;
-            gap: 8px;
-            padding: 10px;
+            gap: 6px;
+            padding: 5px;
             margin-top: auto;
         }
 
         .kb-row {
             display: flex;
             justify-content: center;
-            gap: 6px;
+            gap: 4px;
         }
 
         .key {
@@ -258,10 +260,10 @@
             color: white;
             border: none;
             border-radius: 4px;
-            height: 50px;
-            min-width: clamp(25px, 8vw, 45px);
+            height: clamp(35px, 8vh, 50px);
+            min-width: clamp(22px, 8vw, 45px);
             font-weight: bold;
-            font-size: 1rem;
+            font-size: clamp(0.7rem, 2.5vw, 1rem);
             cursor: pointer;
             display: flex;
             justify-content: center;
@@ -277,17 +279,26 @@
 
         .key.large {
             flex: 1.5;
-            font-size: 0.8rem;
+            font-size: clamp(0.6rem, 2vw, 0.8rem);
         }
 
         #message {
             font-weight: bold;
-            font-size: 1.1rem;
+            font-size: clamp(0.9rem, 3vw, 1.1rem);
             min-height: 1.5rem;
             color: var(--primary);
             text-align: center;
-            margin: 5px 0;
+            margin: 2px 0;
             transition: color 0.5s ease;
+        }
+
+        /* Input Invisível para forçar teclado do celular */
+        #hidden-input {
+            position: absolute;
+            top: -9999px;
+            left: -9999px;
+            opacity: 0;
+            pointer-events: none;
         }
 
         .modal-overlay {
@@ -322,12 +333,13 @@
         .modal h2 {
             color: var(--primary);
             margin-top: 0;
+            font-size: clamp(1.2rem, 4vw, 1.5rem);
         }
 
         .modal p {
             color: #ccc;
             line-height: 1.4;
-            font-size: 0.95rem;
+            font-size: clamp(0.85rem, 3vw, 0.95rem);
             text-align: left;
             margin-bottom: 10px;
         }
@@ -369,13 +381,34 @@
             }
         }
 
-        @media (max-width: 380px) {
-            #duo-boards-container {
-                gap: 5px;
+        /* Espremer elementos no celular quando o teclado subir */
+        @media (max-height: 650px) {
+            header {
+                padding: 2px 0;
             }
 
-            .cell {
-                border-width: 1px;
+            .mode-selector {
+                margin-top: 2px;
+            }
+
+            #theme-display {
+                margin-top: 2px;
+            }
+
+            .classic-cell {
+                width: clamp(30px, 10vw, 45px);
+                height: clamp(30px, 10vw, 45px);
+                font-size: 1.2rem;
+            }
+
+            .duo-cell {
+                width: clamp(20px, 6vw, 35px);
+                height: clamp(20px, 6vw, 35px);
+                font-size: 0.9rem;
+            }
+
+            .key {
+                height: 35px;
             }
         }
     </style>
@@ -410,11 +443,15 @@
 
     <div id="keyboard"></div>
 
+    <!-- Input Invisível para Dispositivos Móveis -->
+    <input type="text" id="hidden-input" value=" " autocomplete="off" autocorrect="off" autocapitalize="off"
+        spellcheck="false">
+
     <!-- Modal Tutorial -->
     <div id="tutorialModal" class="modal-overlay">
         <div class="modal">
             <h2>Como Jogar</h2>
-            <p>Descubra os jogos de 5 letras relacionados ao <b>Tema da Semana</b>. As cores do site mudam a cada semana
+            <p>Descubra os jogos de 5 letras relacionados ao <b>Tema da Semana</b>. As cores mudam a cada semana
                 mergulhando você no universo do jogo!</p>
             <p><b>🎮 Modo Clássico:</b> 1 palavra secreta. Você tem 6 tentativas.</p>
             <p><b>⚔️ Modo Duo:</b> 2 palavras secretas diferentes. Digite para preencher os dois painéis ao mesmo tempo.
@@ -524,6 +561,9 @@
         const VALID_WORDS = DICTIONARY_STRING.split(" ");
         THEMES.forEach(theme => VALID_WORDS.push(...theme.words));
 
+        // ==============================================================================
+        // AUTOMATIZAÇÃO DIÁRIA (Sem travas)
+        // ==============================================================================
         const FORCED_WEEK_INDEX = null;
         const FORCED_DAY_INDEX = null;
 
@@ -557,7 +597,7 @@
         let guessLettersClassic = new Array(COLS).fill("");
         let gameOverClassic = false;
         let keyStatesClassic = {};
-        let historyClassic = []; // Memória de palavras do clássico
+        let historyClassic = [];
 
         const ROWS_DUO = 7;
         let rowDuo = 0;
@@ -566,19 +606,15 @@
         let gameOverDuo = false;
         let boardsSolvedDuo = [false, false];
         let keyStatesDuo = {};
-        let historyDuo = []; // Memória de palavras do duo
+        let historyDuo = [];
 
-        // Carrega o estado salvo
         function loadGameState() {
             const savedData = localStorage.getItem('games_modos_save_v1');
             if (savedData) {
                 const state = JSON.parse(savedData);
-                // Só restaura se for o mesmo dia! Se for amanhã, apaga.
                 if (state.day === daysDiff) {
                     historyClassic = state.classic || [];
                     historyDuo = state.duo || [];
-
-                    // Remonta o jogo instantaneamente, sem animações ou sons
                     historyClassic.forEach(guess => processGuessClassic(guess, true));
                     historyDuo.forEach(guess => processGuessDuo(guess, true));
                 } else {
@@ -587,7 +623,6 @@
             }
         }
 
-        // Salva o estado atual
         function saveGameState() {
             const state = { day: daysDiff, classic: historyClassic, duo: historyDuo };
             localStorage.setItem('games_modos_save_v1', JSON.stringify(state));
@@ -598,6 +633,7 @@
         // ==============================================================================
         const messageDisplay = document.getElementById("message");
         const keyboardDiv = document.getElementById("keyboard");
+        const hiddenInput = document.getElementById("hidden-input");
         const keys = [
             ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
             ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'],
@@ -606,8 +642,7 @@
 
         function initUI() {
             keys.forEach(row => {
-                let rowDiv = document.createElement("div");
-                rowDiv.className = "kb-row";
+                let rowDiv = document.createElement("div"); rowDiv.className = "kb-row";
                 row.forEach(key => {
                     let button = document.createElement("button");
                     button.innerText = key === 'DEL' ? '⌫' : key;
@@ -648,7 +683,6 @@
                 }
             }
 
-            // Tenta puxar memória antes de terminar a UI
             loadGameState();
             updateCursor();
             renderKeyboard();
@@ -680,7 +714,7 @@
                 if (currentMode === 'classic') {
                     let color = getColorCode(keyStatesClassic[key]);
                     btn.style.background = color;
-                    btn.style.color = keyStatesClassic[key] !== 'default' ? 'white' : 'white';
+                    btn.style.color = 'white';
                 } else {
                     let colorLeft = getColorCode(keyStatesDuo[key][0]);
                     let colorRight = getColorCode(keyStatesDuo[key][1]);
@@ -711,17 +745,45 @@
         }
 
         // ==============================================================================
-        // LÓGICA DE INPUT
+        // LÓGICA DO TECLADO NATIVO (CELULAR) & TECLADO FÍSICO
         // ==============================================================================
+
+        // Puxa o teclado nativo ao tocar no corpo do site (menos nos botões)
+        function forceFocus(e) {
+            if (e.target.closest('.key') || e.target.closest('button') || e.target.closest('.modal')) return;
+            hiddenInput.focus();
+        }
+        document.addEventListener("click", forceFocus);
+        document.addEventListener("touchstart", forceFocus);
+
+        // Disparo do Input Nativo (Celular)
+        hiddenInput.addEventListener("input", (e) => {
+            let val = hiddenInput.value;
+            if (val.length === 0) {
+                handleInput("DEL");
+                hiddenInput.value = " ";
+            } else if (val.length > 1) {
+                let char = val.charAt(1).toUpperCase();
+                if (/^[A-Z]$/.test(char)) handleInput(char);
+                hiddenInput.value = " ";
+            }
+        });
+
+        // Disparo do Teclado Físico (PC / Mac)
         document.addEventListener("keydown", (e) => {
             if ((currentMode === 'classic' && gameOverClassic) || (currentMode === 'duo' && gameOverDuo) || isAnimating) return;
             if (document.getElementById("tutorialModal").style.display === "flex" || document.getElementById("endModal").style.display === "flex") return;
 
-            if (e.key === "Enter") handleInput("ENTER");
-            else if (e.key === "Backspace") handleInput("DEL");
-            else if (e.key === "ArrowLeft") handleInput("LEFT");
-            else if (e.key === "ArrowRight") handleInput("RIGHT");
-            else if (/^[a-zA-Z]$/.test(e.key)) handleInput(e.key.toUpperCase());
+            if (e.key === "Enter") { e.preventDefault(); handleInput("ENTER"); }
+            else if (e.key === "Backspace") { e.preventDefault(); handleInput("DEL"); }
+            else if (e.key === "ArrowLeft") { e.preventDefault(); handleInput("LEFT"); }
+            else if (e.key === "ArrowRight") { e.preventDefault(); handleInput("RIGHT"); }
+            else if (/^[a-zA-Z]$/.test(e.key)) {
+                // Impede input duplo no PC se o hidden-input estiver focado
+                if (e.target.id !== 'hidden-input') {
+                    handleInput(e.key.toUpperCase());
+                }
+            }
         });
 
         function handleInput(key) {
@@ -819,7 +881,7 @@
                 isAnimating = true; updateCursor();
                 for (let i = 0; i < COLS; i++) {
                     setTimeout(() => {
-                        rowCells[i].innerText = guessArray[i]; // Garante que a letra tá na tela
+                        rowCells[i].innerText = guessArray[i];
                         rowCells[i].classList.add(statuses[i]);
                         playSfx('flip');
                         let st = statuses[i];
