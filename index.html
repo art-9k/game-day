@@ -2,10 +2,10 @@
 <html lang="pt-BR">
 
 <head>
-    <link rel="icon" type="image/png" href="favicon.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Game Day | Clássico & Duo</title>
+    <title>Game do Dia | Modo Letroso</title>
+    <link rel="icon" type="image/png" href="favicon.png?v=2">
     <style>
         :root {
             --bg-color: #121213;
@@ -140,110 +140,153 @@
             flex-direction: column;
             align-items: center;
             flex: 1;
-            justify-content: center;
+            justify-content: flex-start;
+            padding-top: 10px;
+            overflow-y: auto;
         }
 
         .game-container.active {
             display: flex;
+            animation: fadeIn 0.3s ease;
         }
 
-        #classic-board {
-            display: grid;
-            grid-template-rows: repeat(6, 1fr);
-            grid-gap: 5px;
-            padding: 5px;
-            max-width: 400px;
-        }
-
-        #duo-boards-container {
+        /* Contêineres de Tabuleiros (Estilo Letroso) */
+        .board-wrapper {
             display: flex;
-            gap: 10px;
+            gap: 15px;
             padding: 5px;
-            max-width: 700px;
-            flex-wrap: nowrap;
+            width: 100%;
+            max-width: 900px;
+            justify-content: center;
+            flex-wrap: wrap;
         }
 
         .board {
-            display: grid;
-            grid-gap: 4px;
-            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            padding: 15px;
+            min-height: 150px;
+            flex: 1 1 250px;
+            align-items: center;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+            transition: all 0.5s ease;
         }
 
-        .board-duo {
-            grid-template-rows: repeat(7, 1fr);
+        /* Efeito quando acerta o tabuleiro */
+        .board.solved {
+            border: 2px solid var(--correct);
+            box-shadow: 0 0 15px rgba(83, 141, 78, 0.3);
+        }
+
+        .board.solved .row:not(:last-child) {
+            opacity: 0.3;
+            filter: grayscale(100%);
         }
 
         .row {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            grid-gap: 4px;
+            display: flex;
             justify-content: center;
+            gap: 4px;
+            flex-wrap: wrap;
         }
 
         .cell {
-            border: 2px solid var(--empty-cell);
             display: flex;
             justify-content: center;
             align-items: center;
             font-weight: bold;
             text-transform: uppercase;
             transition: all 0.3s ease;
-            cursor: default;
+            aspect-ratio: 1;
         }
 
+        /* Dimensionamento flexível das letras enviadas */
         .classic-cell {
-            width: clamp(35px, 12vw, 60px);
-            height: clamp(35px, 12vw, 60px);
-            font-size: clamp(1.5rem, 6vw, 2rem);
+            width: clamp(30px, 8vw, 45px);
+            font-size: clamp(1.2rem, 4vw, 1.8rem);
+            border-radius: 4px;
         }
 
         .duo-cell {
-            width: clamp(24px, 8vw, 50px);
-            height: clamp(24px, 8vw, 50px);
-            font-size: clamp(1rem, 4vw, 1.6rem);
+            width: clamp(24px, 6vw, 35px);
+            font-size: clamp(1rem, 3vw, 1.4rem);
+            border-radius: 3px;
         }
 
-        .cell.active-cursor {
-            border-bottom: 4px solid var(--primary);
-            box-sizing: border-box;
-            background-color: rgba(255, 255, 255, 0.05);
-        }
-
-        .cell.clickable {
-            cursor: pointer;
-        }
-
-        .cell.filled {
-            border-color: var(--filled-cell);
-            animation: pop 0.1s ease-in-out;
+        .trio-cell {
+            width: clamp(20px, 5vw, 30px);
+            font-size: clamp(0.8rem, 2.5vw, 1.2rem);
+            border-radius: 3px;
         }
 
         .cell.correct,
         .cell.present,
         .cell.absent {
             color: white;
-            animation: flipIn 0.4s ease-in-out;
+            animation: flipIn 0.5s ease-in-out;
         }
 
         .cell.correct {
             background-color: var(--correct);
-            border-color: var(--correct);
+            border: 2px solid var(--correct);
         }
 
         .cell.present {
             background-color: var(--present);
-            border-color: var(--present);
+            border: 2px solid var(--present);
         }
 
         .cell.absent {
             background-color: var(--absent);
-            border-color: var(--absent);
+            border: 2px solid var(--absent);
         }
 
-        .board.solved .cell:not(.correct) {
-            opacity: 0.4;
+        /* Visor de Digitação Centralizado */
+        #typing-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin: 10px 0;
+            min-height: 70px;
+            width: 100%;
         }
 
+        #attempts-display {
+            color: var(--primary);
+            font-weight: bold;
+            font-size: 0.85rem;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        #typing-row {
+            display: flex;
+            justify-content: center;
+            gap: 4px;
+            min-height: 45px;
+            flex-wrap: wrap;
+        }
+
+        .typing-cell {
+            width: clamp(30px, 8vw, 45px);
+            height: clamp(30px, 8vw, 45px);
+            font-size: clamp(1.2rem, 5vw, 1.8rem);
+            border: 2px solid var(--filled-cell);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            text-transform: uppercase;
+            border-radius: 4px;
+            animation: pop 0.1s ease-in-out;
+        }
+
+        /* Teclado Virtual */
         #keyboard {
             width: 100%;
             max-width: 550px;
@@ -407,11 +450,23 @@
 
         @keyframes flipIn {
             0% {
-                transform: scaleY(0);
+                transform: rotateX(-90deg);
             }
 
             100% {
-                transform: scaleY(1);
+                transform: rotateX(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            0% {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            100% {
+                opacity: 1;
+                transform: translateY(0);
             }
         }
 
@@ -428,20 +483,13 @@
                 margin-top: 2px;
             }
 
-            .classic-cell {
-                width: clamp(30px, 10vw, 45px);
-                height: clamp(30px, 10vw, 45px);
-                font-size: 1.2rem;
-            }
-
-            .duo-cell {
-                width: clamp(20px, 6vw, 35px);
-                height: clamp(20px, 6vw, 35px);
-                font-size: 0.9rem;
-            }
-
             .key {
                 height: 35px;
+            }
+
+            #typing-area {
+                min-height: 50px;
+                margin: 5px 0;
             }
         }
     </style>
@@ -461,44 +509,59 @@
         <div class="mode-selector">
             <button id="btn-classic" class="mode-btn active" onclick="setMode('classic')">Clássico</button>
             <button id="btn-duo" class="mode-btn" onclick="setMode('duo')">Duo</button>
+            <button id="btn-trio" class="mode-btn" onclick="setMode('trio')">Trio</button>
         </div>
     </header>
 
-    <div>
-        <div id="message"></div>
-        <div id="classic-container" class="game-container active">
+    <div id="classic-container" class="game-container active">
+        <div class="board-wrapper" id="classic-boards-container">
             <div id="classic-board" class="board"></div>
         </div>
-        <div id="duo-container" class="game-container">
-            <div id="duo-boards-container">
-                <div id="board-duo-0" class="board board-duo"></div>
-                <div id="board-duo-1" class="board board-duo"></div>
-            </div>
+    </div>
+
+    <div id="duo-container" class="game-container">
+        <div class="board-wrapper" id="duo-boards-container">
+            <div id="board-duo-0" class="board"></div>
+            <div id="board-duo-1" class="board"></div>
         </div>
     </div>
+
+    <div id="trio-container" class="game-container">
+        <div class="board-wrapper" id="trio-boards-container">
+            <div id="board-trio-0" class="board"></div>
+            <div id="board-trio-1" class="board"></div>
+            <div id="board-trio-2" class="board"></div>
+        </div>
+    </div>
+
+    <div id="typing-area">
+        <div id="attempts-display">Tentativas: 0/6</div>
+        <div id="typing-row"></div>
+    </div>
+
+    <div id="message"></div>
 
     <div id="keyboard"></div>
     <input type="text" id="hidden-input" value=" " autocomplete="off" autocorrect="off" autocapitalize="off"
         spellcheck="false">
 
-    <!-- Modal Tutorial -->
     <div id="tutorialModal" class="modal-overlay">
         <div class="modal">
-            <h2>Como Jogar</h2>
-            <p>Descubra os jogos de 5 letras relacionados ao <b>Tema da Semana</b>. As cores mudam a cada semana
-                mergulhando você no universo do jogo!</p>
-            <p><b>🎮 Modo Clássico:</b> 1 palavra secreta. Você tem 6 tentativas.</p>
-            <p><b>⚔️ Modo Duo:</b> 2 palavras secretas diferentes. Digite para preencher os dois painéis ao mesmo tempo.
-                Você tem 7 tentativas.</p>
-            <p>Qualquer palavra válida em inglês também pode ser usada para testar letras.</p>
+            <h2>Bem-vindo ao Modo Letroso</h2>
+            <p>Descubra as palavras secretas ligadas ao <b>Tema da Semana</b>. </p>
+            <p><b>Sem Limite de Letras!</b> Não há quadrados vazios para te ajudar. A palavra pode ser pequena ou
+                gigante. Digite qualquer coisa para tentar descobrir as letras e o tamanho exato da resposta com base
+                nas cores!</p>
+            <p><b>Clássico:</b> 1 palavra (6 tentativas).</p>
+            <p><b>Duo:</b> 2 palavras (7 tentativas).</p>
+            <p><b>Trio:</b> 3 palavras (8 tentativas).</p>
             <button class="close-modal" onclick="closeTutorial()">Entendi, vamos lá!</button>
         </div>
     </div>
 
-    <!-- Modal Ranking / Estatísticas -->
     <div id="rankingModal" class="modal-overlay">
         <div class="modal">
-            <h2>🏆 Suas Estatísticas</h2>
+            <h2>Suas Estatísticas</h2>
 
             <div class="stats-container">
                 <div class="stat-box">
@@ -518,21 +581,18 @@
                     <div class="stat-label">Melhor</div>
                 </div>
             </div>
-
             <button class="close-modal"
                 onclick="document.getElementById('rankingModal').style.display='none'">Fechar</button>
         </div>
     </div>
 
-    <!-- Modal Vitória/Derrota -->
     <div id="endModal" class="modal-overlay">
         <div class="modal">
             <h2 id="end-title">Fim de Jogo!</h2>
             <p id="end-desc"
                 style="text-align: center; font-weight: bold; color: var(--primary); font-size: 1.2rem; letter-spacing: 1px;">
             </p>
-            <p style="text-align: center;">Veja suas estatísticas no botão 🏆 acima ou volte amanhã para novas palavras!
-            </p>
+            <p style="text-align: center;">Veja suas estatísticas no botão 🏆 ou volte amanhã para um novo desafio!</p>
             <button class="close-modal"
                 onclick="document.getElementById('endModal').style.display='none'">Fechar</button>
         </div>
@@ -542,12 +602,8 @@
         // ==============================================================================
         // 🛠️ CONFIGURAÇÕES DE DESENVOLVEDOR / ADMINISTRADOR
         // ==============================================================================
-        // Altere os valores abaixo para testar diferentes semanas e dias.
-        // Deixe como 'null' para o jogo seguir a data real automaticamente.
         // Semanas (0 a 8): 0(Mario), 1(Zelda), 2(Sonic), 3(Undertale), 4(GTA), 5(Minecraft), 6(Pokémon), 7(Mortal Kombat), 8(Resident Evil)
-        const FORCED_WEEK_INDEX = 0; // Forçado para iniciar no Universo Mario
-
-        // Dia da semana (0 a 6): 0(Domingo) até 6(Sábado)
+        const FORCED_WEEK_INDEX = 0;
         const FORCED_DAY_INDEX = null;
 
         // ==============================================================================
@@ -613,26 +669,22 @@
         }
 
         // ==============================================================================
-        // ⚙️ BANCO DE DADOS
+        // ⚙️ BANCO DE DADOS (Agora com tamanhos mistos de 4 a 8 letras)
         // ==============================================================================
         const THEMES = [
-            { name: "Universo Mario", colors: { bg: "#1a0505", primary: "#ff3b3b" }, words: ["MARIO", "LUIGI", "YOSHI", "KOOPA", "PEACH", "SHELL", "COINS", "WARIO", "TOADS", "PIPES", "KARTS", "STARS", "CHOMP", "BLOCK", "CAPES", "SUPER", "PARTY", "WORLD", "GHOST", "ITEMS", "FUNKY", "DAISY", "WORLD"] },
-            { name: "Universo Zelda", colors: { bg: "#051a0b", primary: "#2edb54" }, words: ["ZELDA", "GANON", "SWORD", "RUPEE", "EPONA", "KOROK", "DARUK", "HYLIA", "LINKS", "MAGIC", "ARROW", "BOMBS", "NAVIS", "MIDNA", "SHEIK", "QUEST", "HEROS", "HEART", "MASKS", "TIMES", "FAIRY"] },
-            { name: "Universo Sonic", colors: { bg: "#050a1a", primary: "#3b82f6" }, words: ["SONIC", "TAILS", "RINGS", "CHAOS", "GREEN", "SPEED", "ROUGE", "SEGAS", "SPIKE", "JUMPS", "SUPER", "RACES", "ZONES", "HILLS", "BLAZE", "CREAM", "TRACK", "WATER", "LIGHT", "POWER", "BOOTS"] },
-            { name: "Universo Undertale", colors: { bg: "#000000", primary: "#e74c3c" }, words: ["FRISK", "CHARA", "HEART", "SOULS", "MERCY", "FIGHT", "SPARE", "SAVES", "ITEMS", "KNIFE", "RUINS", "BONES", "DUSTS", "HUMAN", "CORES", "SNOWY", "FALLS", "TEMMI", "UNDYN", "DREEM", "RESET"] },
-            { name: "Universo GTA", colors: { bg: "#170b1a", primary: "#ff5bc5" }, words: ["GRAND", "THEFT", "AUTOS", "VICES", "HEIST", "CRIME", "GANGS", "MONEY", "DRIVE", "SHOOT", "STEAL", "CHASE", "STARS", "BOATS", "BIKES", "TANKS", "RADIO", "DRUGS", "CITYS", "CREWS", "MAFIA"] },
-            { name: "Universo Minecraft", colors: { bg: "#0d170d", primary: "#2ecc71" }, words: ["BLOCK", "CRAFT", "STEVE", "MINES", "WORLD", "ENDER", "STONE", "CREEP", "DIRTS", "WOODS", "TOOLS", "SWORD", "APPLE", "WHEAT", "SHEEP", "BLAZE", "GHAST", "SLIME", "IRONS", "GOLDS", "CAVES"] },
-            { name: "Universo Pokémon", colors: { bg: "#1a1605", primary: "#facc15" }, words: ["KANTO", "BADGE", "TRADE", "CATCH", "EEVEE", "LUGIA", "CHAMP", "PIKAS", "BALLS", "WATER", "GRASS", "FAIRY", "STEEL", "ELITE", "ITEMS", "TRAIN", "BERRY", "TYPES", "ROUTE", "HOENN", "FIGHT"] },
-            { name: "Mortal Kombat", colors: { bg: "#1a0d00", primary: "#f59e0b" }, words: ["FATAL", "BLOOD", "FIGHT", "DEATH", "SKULL", "NINJA", "SOULS", "SPEAR", "BLADE", "PUNCH", "KICKS", "GORES", "CHAMP", "REALM", "EARTH", "MAGIC", "KAHNS", "BONES", "SPINE", "FIRES", "FROST"] },
-            { name: "Resident Evil", colors: { bg: "#0a0a0a", primary: "#dc2626" }, words: ["VIRUS", "ZOMBI", "STARS", "CHRIS", "HERBS", "BLOOD", "BITES", "DEATH", "AMMOS", "SAVES", "PANIC", "SCARY", "FLESH", "ALLEY", "GATES", "DOORS", "LOCKS", "ITEMS", "KNIFE", "LASER", "EVILS"] }
+            { name: "Universo Mario", colors: { bg: "#1a0505", primary: "#ff3b3b" }, days: [["MARIO", "LUIGI", "YOSHI"], ["BOWSER", "CASTLE", "FLOWER"], ["TOAD", "STAR", "KART"], ["GOOMBAS", "PLUMBER", "FIREBAR"], ["PRINCESS", "MUSHROOM", "NINTENDO"], ["KOOPA", "PEACH", "COINS"], ["SHELLS", "TURNIP", "BLOCKS"]] },
+            { name: "Universo Zelda", colors: { bg: "#051a0b", primary: "#2edb54" }, days: [["ZELDA", "GANON", "MAGIC"], ["HYRULE", "MASTER", "SHIELD"], ["LINK", "NAVI", "TIME"], ["TRIFORCE", "OCARINA", "COURAGE"], ["TWILIGHT", "WINDWAKE", "CALAMITY"], ["SWORD", "RUPEE", "EPONA"], ["GERUDO", "HYLIAN", "MOBLIN"]] },
+            { name: "Universo Sonic", colors: { bg: "#050a1a", primary: "#3b82f6" }, days: [["SONIC", "TAILS", "RINGS"], ["EGGMAN", "SHADOW", "SILVER"], ["DASH", "SPIN", "FAST"], ["EMERALD", "ECHIDNA", "TORNADO"], ["HEDGEHOG", "KNUCKLES", "ROBOTNIK"], ["ROUGE", "CHAOS", "SPEED"], ["HEROES", "SECRET", "STAGES"]] },
+            { name: "Universo Undertale", colors: { bg: "#000000", primary: "#e74c3c" }, days: [["FRISK", "CHARA", "MERCY"], ["ASGORE", "FLOWEY", "TORIEL"], ["SANS", "SOUL", "LOVE"], ["PAPYRUS", "MONSTER", "SNOWDIN"], ["METTATON", "SKELETON", "GENOCIDE"], ["FIGHT", "SPARE", "RUINS"], ["TEMMIE", "SPIDER", "MUFFET"]] },
+            { name: "Universo GTA", colors: { bg: "#170b1a", primary: "#ff5bc5" }, days: [["GRAND", "THEFT", "AUTOS"], ["WANTED", "POLICE", "CRIMES"], ["CARS", "GUNS", "COPS"], ["MISSION", "WEAPONS", "TREVORS"], ["VICECITY", "ROCKSTAR", "CRIMINAL"], ["GANGS", "HEIST", "MONEY"], ["CLAUDE", "TOMMYS", "STOLEN"]] },
+            { name: "Universo Minecraft", colors: { bg: "#0d170d", primary: "#2ecc71" }, days: [["BLOCK", "CRAFT", "STEVE"], ["ZOMBIE", "SPIDER", "PIGLIN"], ["DIRT", "WOOD", "IRON"], ["CREEPER", "DIAMOND", "EMERALD"], ["OBSIDIAN", "SKELETON", "ENDERMAN"], ["SWORD", "WORLD", "MINES"], ["NETHER", "POTION", "ELYTRA"]] },
+            { name: "Universo Pokémon", colors: { bg: "#1a1605", primary: "#facc15" }, days: [["KANTO", "BADGE", "CATCH"], ["MEWTWO", "EVOLVE", "POTION"], ["BALL", "GYMS", "FIRE"], ["PIKACHU", "POKEDEX", "TRAINER"], ["NINTENDO", "SQUIRTLE", "POKEBALL"], ["EEVEE", "LUGIA", "HOENN"], ["SINNOH", "UNOVAS", "JOHTOS"]] },
+            { name: "Mortal Kombat", colors: { bg: "#1a0d00", primary: "#f59e0b" }, days: [["FATAL", "BLOOD", "FIGHT"], ["RAIDEN", "LIUKAN", "JOHNNY"], ["GORE", "KICK", "FIRE"], ["REPTILE", "SUBZERO", "SCORPIO"], ["SCORPION", "FATALITY", "OUTWORLD"], ["NINJA", "REALM", "SOULS"], ["BLADES", "COMBAT", "DRAGON"]] },
+            { name: "Resident Evil", colors: { bg: "#0a0a0a", primary: "#dc2626" }, days: [["VIRUS", "ZOMBI", "STARS"], ["ALBERT", "WESKER", "CLAIRE"], ["EVIL", "LEON", "JILL"], ["NEMESIS", "UMBRELLA", "RACCOON"], ["RESIDENT", "SURVIVAL", "OUTBREAK"], ["CHRIS", "HERBS", "BLOOD"], ["ASHLEY", "TYRANT", "HUNTER"]] }
         ];
 
-        const DICTIONARY_STRING = "ABOUT ABOVE ABUSE ACTOR ACUTE ADAPT ADMIT ADOPT ADULT AFTER AGAIN AGENT AGREE AHEAD ALARM ALBUM ALERT ALIKE ALIVE ALLOW ALONE ALONG ALTER AMONG ANGER ANGLE ANGRY APART APPLE APPLY ARENA ARGUE ARISE ARRAY ASIDE ASSET AUDIO AUDIT AVOID AWARD AWARE BADLY BAKER BASES BASIC BASIS BEACH BEAR BEAST BEGIN BEING BELOW BENCH BILLY BIRTH BLACK BLAME BLIND BLOCK BLOOD BOARD BRAIN BRAND BREAD BREAK BRICK BRIEF BRING BROAD BROWN BUILD BUILT BUYER CABLE CALIF CARRY CATCH CAUSE CHAIN CHAIR CHART CHASE CHEAP CHECK CHIEF CHILD CHINA CHOSE CIVIL CLAIM CLASS CLEAN CLEAR CLICK CLOCK CLOSE COACH COAST COULD COUNT COURT COVER CRACK CRAFT CRASH CREAM CRIME CROSS CROWD CROWN CURVE CYCLE DAILY DANCE DATED DEALT DEATH DEBUT DELAY DEPTH DOING DOUBT DOZEN DRAFT DRAMA DRAWN DREAM DRESS DRILL DRINK DRIVE DROVE DYING EAGER EARLY EARTH EIGHT ELITE EMPTY ENEMY ENJOY ENTER ENTRY EQUAL ERROR EVENT EVERY EXACT EXIST EXTRA FAITH FALSE FAULT FIBER FIELD FIFTH FIFTY FIGHT FINAL FIRST FIXED FLASH FLEET FLOOR FLUID FOCUS FORCE FORTH FORTY FORUM FOUND FRAME FRANK FRAUD FRESH FRONT FRUIT FULLY FUNNY GIANT GIVEN GLASS GLOBE GOING GRACE GRADE GRAND GRANT GRASS GREAT GREEN GROSS GROUP GROWN GUARD GUESS GUEST GUIDE HAPPY HARRY HEART HEAVY HENCE HORSE HOTEL HOUSE INDEX INNER INPUT ISSUE JOINT JONES JUDGE KNOWN LABEL LARGE LASER LATER LAUGH LAYER LEARN LEASE LEAST LEAVE LEGAL LEVEL LIGHT LIMIT LOCAL LOGIC LOOSE LUCKY MAGIC MAJOR MAKER MARCH MATCH MAYOR MEANT MEDIA METAL MIGHT MINOR MINUS MIXED MODEL MONEY MONTH MORAL MOTOR MOUNT MOUSE MOUTH MOVIE MUSIC NEEDS NEVER NIGHT NOISE NORTH NOTED NOVEL NURSE OCCUR OCEAN OFFER OFTEN ORDER OTHER OUGHT OUNCE OUTER OVER OWNED OWNER PAGES PANEL PAPER PARTY PEACE PETER PHASE PHONE PHOTO PIECE PILOT PITCH PLACE PLAIN PLANE PLANT PLATE POINT POUND POWER PRESS PRICE PRIDE PRIME PRINT PRIOR PRIZE PROOF PROUD PROVE QUEEN QUICK QUIET QUITE RADIO RAISE RANGE RAPID RATIO REACH READY REFER RIGHT RIVAL RIVER ROMAN ROUGH ROUND ROUTE ROYAL RURAL SCALE SCENE SCOPE SCORE SENSE SERVE SEVEN SHALL SHAPE SHARE SHARP SHEET SHELF SHELL SHIFT SHIRT SHOCK SHOOT SHORT SHOWN SIGHT SINCE SIXTH SKILL SLEEP SLIDE SMALL SMART SMILE SMITH SMOKE SOLID SOLVE SORRY SOUND SOUTH SPACE SPARE SPEAK SPEED SPEND SPORT SQUAD STAFF STAGE STAND START STATE STEAM STEEL STICK STILL STOCK STONE STORE STORM STORY STRIP STUCK STUDY STUFF STYLE SUGAR SUITE SUPER SWEET TABLE TAKEN TASTE TAXES TEACH TEETH TEXAS THANK THEFT THEIR THEME THERE THESE THICK THING THINK THIRD THOSE THREE THREW THROW TIGHT TIMES TIRED TITLE TODAY TOPIC TOTAL TOUCH TOUGH TOWER TRACK TRADE TRAIN TREAT TREND TRIAL TRIBE TRICK TRUST TRUTH TULSA UNDER UNION UNITY UNTIL UPPER UPSET URBAN USAGE USUAL VALID VALUE VIDEO VIRUS VISIT VITAL VOICE WASTE WATCH WATER WHEEL WHERE WHICH WHILE WHITE WHOLE WEIGH WOMEN WORLD WORRY WORSE WORST WORTH WOULD WOUND WRONG YIELD YOUNG YOUTH SMASH MELEE BRAWL CRASH SPYRO HADES STRAY OMORI LIMBO BRAID SPORE MAFIA METRO BULLY FORZA QUAKE SMITE AMONG ELDEN SOULS GEARS METAL TALES HEAVY GHOST BLOOD CREED ALIEN ROGUE NINJA SLIME MAGIC GRAND THEFT FINAL QUEST SPACE PAYNE DEVIL ALONE ELDER EARTH";
-        const VALID_WORDS = DICTIONARY_STRING.split(" ");
-        THEMES.forEach(theme => VALID_WORDS.push(...theme.words));
-
         // ==============================================================================
-        // AUTOMATIZAÇÃO DIÁRIA E ESTATÍSTICAS
+        // CONFIGURAÇÕES DA SESSÃO
         // ==============================================================================
         const epoch = new Date("2024-01-07T00:00:00");
         const today = new Date();
@@ -643,52 +695,54 @@
         const dayOfWeek = FORCED_DAY_INDEX !== null ? (FORCED_DAY_INDEX % 7) : daysDiff % 7;
 
         const currentTheme = THEMES[weekIndex];
-        const secretClassic = currentTheme.words[dayOfWeek * 3];
-        const secretDuo1 = currentTheme.words[dayOfWeek * 3 + 1];
-        const secretDuo2 = currentTheme.words[dayOfWeek * 3 + 2];
+        const dailyWords = currentTheme.days[dayOfWeek];
+
+        const secretClassic = dailyWords[0];
+        const secretDuo1 = dailyWords[0]; const secretDuo2 = dailyWords[1];
+        const secretTrio1 = dailyWords[0]; const secretTrio2 = dailyWords[1]; const secretTrio3 = dailyWords[2];
 
         document.documentElement.style.setProperty('--bg-color', currentTheme.colors.bg);
         document.documentElement.style.setProperty('--primary', currentTheme.colors.primary);
         document.getElementById("theme-display").innerText = `Semana: ${currentTheme.name}`;
 
         let currentMode = 'classic';
-        const COLS = 5;
+        let currentGuess = ""; // Apenas guarda a string central!
         let isAnimating = false;
 
         const ROWS_CLASSIC = 6;
-        let rowClassic = 0; let colClassic = 0;
-        let guessLettersClassic = new Array(COLS).fill("");
         let gameOverClassic = false; let keyStatesClassic = {}; let historyClassic = [];
 
         const ROWS_DUO = 7;
-        let rowDuo = 0; let colDuo = 0;
-        let guessLettersDuo = new Array(COLS).fill("");
         let gameOverDuo = false; let boardsSolvedDuo = [false, false]; let keyStatesDuo = {}; let historyDuo = [];
 
-        // Estatísticas Locais
+        const ROWS_TRIO = 8;
+        let gameOverTrio = false; let boardsSolvedTrio = [false, false, false]; let keyStatesTrio = {}; let historyTrio = [];
+
         let userStats = { played: 0, wins: 0, currentStreak: 0, maxStreak: 0 };
 
         function loadGameState() {
             const savedStats = localStorage.getItem('games_modos_stats');
             if (savedStats) userStats = JSON.parse(savedStats);
 
-            const savedData = localStorage.getItem('games_modos_save_v2');
+            const savedData = localStorage.getItem('games_modos_save_letroso');
             if (savedData) {
                 const state = JSON.parse(savedData);
                 if (state.day === daysDiff) {
                     historyClassic = state.classic || [];
                     historyDuo = state.duo || [];
+                    historyTrio = state.trio || [];
                     historyClassic.forEach(guess => processGuessClassic(guess, true));
                     historyDuo.forEach(guess => processGuessDuo(guess, true));
+                    historyTrio.forEach(guess => processGuessTrio(guess, true));
                 } else {
-                    localStorage.removeItem('games_modos_save_v2');
+                    localStorage.removeItem('games_modos_save_letroso');
                 }
             }
         }
 
         function saveGameState() {
-            const state = { day: daysDiff, classic: historyClassic, duo: historyDuo };
-            localStorage.setItem('games_modos_save_v2', JSON.stringify(state));
+            const state = { day: daysDiff, classic: historyClassic, duo: historyDuo, trio: historyTrio };
+            localStorage.setItem('games_modos_save_letroso', JSON.stringify(state));
         }
 
         function updateStats(won) {
@@ -704,11 +758,12 @@
         }
 
         // ==============================================================================
-        // INTERFACE: TABULEIROS E TECLADO
+        // INTERFACE: TECLADO E VISOR
         // ==============================================================================
         const messageDisplay = document.getElementById("message");
         const keyboardDiv = document.getElementById("keyboard");
         const hiddenInput = document.getElementById("hidden-input");
+        const typingRow = document.getElementById("typing-row");
         const keys = [
             ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
             ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'],
@@ -728,50 +783,45 @@
                     if (/^[A-Z]$/.test(key)) {
                         keyStatesClassic[key] = 'default';
                         keyStatesDuo[key] = ['default', 'default'];
+                        keyStatesTrio[key] = ['default', 'default', 'default'];
                     }
                     rowDiv.appendChild(button);
                 });
                 keyboardDiv.appendChild(rowDiv);
             });
 
-            const boardClassicDiv = document.getElementById("classic-board");
-            for (let r = 0; r < ROWS_CLASSIC; r++) {
-                let row = document.createElement("div"); row.className = "row";
-                for (let c = 0; c < COLS; c++) {
-                    let cell = document.createElement("div"); cell.className = "cell classic-cell"; cell.setAttribute("id", `cell-classic-${r}-${c}`);
-                    cell.addEventListener("click", () => { if (currentMode === 'classic' && r === rowClassic && !gameOverClassic && !isAnimating) { colClassic = c; updateCursor(); } });
-                    row.appendChild(cell);
-                }
-                boardClassicDiv.appendChild(row);
-            }
-
-            for (let b = 0; b < 2; b++) {
-                const boardDuoDiv = document.getElementById(`board-duo-${b}`);
-                for (let r = 0; r < ROWS_DUO; r++) {
-                    let row = document.createElement("div"); row.className = "row";
-                    for (let c = 0; c < COLS; c++) {
-                        let cell = document.createElement("div"); cell.className = "cell duo-cell"; cell.setAttribute("id", `cell-duo-${b}-${r}-${c}`);
-                        cell.addEventListener("click", () => { if (currentMode === 'duo' && r === rowDuo && !gameOverDuo && !isAnimating) { colDuo = c; updateCursor(); } });
-                        row.appendChild(cell);
-                    }
-                    boardDuoDiv.appendChild(row);
-                }
-            }
-
+            // Tabuleiros começam vazios! Sem loop de geração de células vazias.
             loadGameState();
-            updateCursor();
-            renderKeyboard();
+            setMode('classic');
         }
 
         function setMode(mode) {
             if (isAnimating) return;
             currentMode = mode;
-            document.getElementById("btn-classic").classList.toggle("active", mode === 'classic');
-            document.getElementById("btn-duo").classList.toggle("active", mode === 'duo');
-            document.getElementById("classic-container").classList.toggle("active", mode === 'classic');
-            document.getElementById("duo-container").classList.toggle("active", mode === 'duo');
-            updateCursor();
+            ['classic', 'duo', 'trio'].forEach(m => {
+                document.getElementById(`btn-${m}`).classList.toggle("active", mode === m);
+                document.getElementById(`${m}-container`).classList.toggle("active", mode === m);
+            });
+            currentGuess = "";
+            renderTypingRow();
+            updateAttemptsDisplay();
             renderKeyboard();
+        }
+
+        function updateAttemptsDisplay() {
+            let max = currentMode === 'classic' ? ROWS_CLASSIC : (currentMode === 'duo' ? ROWS_DUO : ROWS_TRIO);
+            let current = currentMode === 'classic' ? historyClassic.length : (currentMode === 'duo' ? historyDuo.length : historyTrio.length);
+            document.getElementById("attempts-display").innerText = `Tentativas: ${current}/${max}`;
+        }
+
+        function renderTypingRow() {
+            typingRow.innerHTML = "";
+            for (let i = 0; i < currentGuess.length; i++) {
+                let cell = document.createElement("div");
+                cell.className = `typing-cell`;
+                cell.innerText = currentGuess[i];
+                typingRow.appendChild(cell);
+            }
         }
 
         function getColorCode(status) {
@@ -779,6 +829,18 @@
             if (status === 'present') return '#b59f3b';
             if (status === 'absent') return '#3a3a3c';
             return 'var(--key-bg)';
+        }
+
+        function updateKeyState(letter, status, mode, boardIndex) {
+            let weight = { 'default': 0, 'absent': 1, 'present': 2, 'correct': 3 };
+
+            if (mode === 'classic') {
+                if (weight[status] > weight[keyStatesClassic[letter]]) keyStatesClassic[letter] = status;
+            } else if (mode === 'duo') {
+                if (weight[status] > weight[keyStatesDuo[letter][boardIndex]]) keyStatesDuo[letter][boardIndex] = status;
+            } else if (mode === 'trio') {
+                if (weight[status] > weight[keyStatesTrio[letter][boardIndex]]) keyStatesTrio[letter][boardIndex] = status;
+            }
         }
 
         function renderKeyboard() {
@@ -789,38 +851,25 @@
                 if (currentMode === 'classic') {
                     let color = getColorCode(keyStatesClassic[key]);
                     btn.style.background = color;
+                    btn.style.color = keyStatesClassic[key] !== 'default' ? 'white' : 'white';
+                } else if (currentMode === 'duo') {
+                    let c0 = getColorCode(keyStatesDuo[key][0]); let c1 = getColorCode(keyStatesDuo[key][1]);
+                    if (c0 === c1 && c0 !== 'var(--key-bg)') btn.style.background = c0;
+                    else if (c0 === 'var(--key-bg)' && c1 === 'var(--key-bg)') btn.style.background = 'var(--key-bg)';
+                    else btn.style.background = `linear-gradient(90deg, ${c0} 50%, ${c1} 50%)`;
                     btn.style.color = 'white';
-                } else {
-                    let colorLeft = getColorCode(keyStatesDuo[key][0]);
-                    let colorRight = getColorCode(keyStatesDuo[key][1]);
-
-                    if (colorLeft === colorRight && colorLeft !== 'var(--key-bg)') btn.style.background = colorLeft;
-                    else if (colorLeft === 'var(--key-bg)' && colorRight === 'var(--key-bg)') btn.style.background = 'var(--key-bg)';
-                    else btn.style.background = `linear-gradient(90deg, ${colorLeft} 50%, ${colorRight} 50%)`;
+                } else if (currentMode === 'trio') {
+                    let c0 = getColorCode(keyStatesTrio[key][0]); let c1 = getColorCode(keyStatesTrio[key][1]); let c2 = getColorCode(keyStatesTrio[key][2]);
+                    if (c0 === c1 && c1 === c2 && c0 !== 'var(--key-bg)') btn.style.background = c0;
+                    else if (c0 === 'var(--key-bg)' && c1 === 'var(--key-bg)' && c2 === 'var(--key-bg)') btn.style.background = 'var(--key-bg)';
+                    else btn.style.background = `linear-gradient(90deg, ${c0} 33.3%, ${c1} 33.3%, ${c1} 66.6%, ${c2} 66.6%)`;
                     btn.style.color = 'white';
                 }
             });
         }
 
-        function updateCursor() {
-            document.querySelectorAll('.cell').forEach(c => c.classList.remove('active-cursor', 'clickable'));
-
-            if (currentMode === 'classic' && !gameOverClassic && rowClassic < ROWS_CLASSIC && !isAnimating) {
-                for (let c = 0; c < COLS; c++) document.getElementById(`cell-classic-${rowClassic}-${c}`).classList.add('clickable');
-                document.getElementById(`cell-classic-${rowClassic}-${colClassic}`).classList.add('active-cursor');
-            }
-            else if (currentMode === 'duo' && !gameOverDuo && rowDuo < ROWS_DUO && !isAnimating) {
-                for (let b = 0; b < 2; b++) {
-                    if (!boardsSolvedDuo[b]) {
-                        for (let c = 0; c < COLS; c++) document.getElementById(`cell-duo-${b}-${rowDuo}-${c}`).classList.add('clickable');
-                        document.getElementById(`cell-duo-${b}-${rowDuo}-${colDuo}`).classList.add('active-cursor');
-                    }
-                }
-            }
-        }
-
         // ==============================================================================
-        // LÓGICA DO TECLADO NATIVO (CELULAR) & TECLADO FÍSICO
+        // LÓGICA DE INPUT UNIFICADA
         // ==============================================================================
         function forceFocus(e) {
             if (e.target.closest('.key') || e.target.closest('button') || e.target.closest('.modal') || e.target.closest('.header-icons')) return;
@@ -840,213 +889,169 @@
         });
 
         document.addEventListener("keydown", (e) => {
-            if ((currentMode === 'classic' && gameOverClassic) || (currentMode === 'duo' && gameOverDuo) || isAnimating) return;
+            let gOver = currentMode === 'classic' ? gameOverClassic : (currentMode === 'duo' ? gameOverDuo : gameOverTrio);
+            if (gOver || isAnimating) return;
             if (document.getElementById("tutorialModal").style.display === "flex" || document.getElementById("endModal").style.display === "flex" || document.getElementById("rankingModal").style.display === "flex") return;
 
             if (e.key === "Enter") { e.preventDefault(); handleInput("ENTER"); }
             else if (e.key === "Backspace") { e.preventDefault(); handleInput("DEL"); }
-            else if (e.key === "ArrowLeft") { e.preventDefault(); handleInput("LEFT"); }
-            else if (e.key === "ArrowRight") { e.preventDefault(); handleInput("RIGHT"); }
             else if (/^[a-zA-Z]$/.test(e.key)) { if (e.target.id !== 'hidden-input') handleInput(e.key.toUpperCase()); }
         });
 
         function handleInput(key) {
-            let isCl = currentMode === 'classic';
-            let gOver = isCl ? gameOverClassic : gameOverDuo;
+            let gOver = currentMode === 'classic' ? gameOverClassic : (currentMode === 'duo' ? gameOverDuo : gameOverTrio);
             if (gOver || isAnimating) return;
 
-            if (key === "ENTER") { isCl ? attemptClassic() : attemptDuo(); }
-            else if (key === "DEL") { deleteLetter(); playSfx('delete'); }
-            else if (key === "LEFT") {
-                if (isCl && colClassic > 0) { colClassic--; updateCursor(); }
-                else if (!isCl && colDuo > 0) { colDuo--; updateCursor(); }
+            if (key === "ENTER") {
+                if (currentGuess.length === 0) return;
+                currentMode === 'classic' ? attemptClassic() : (currentMode === 'duo' ? attemptDuo() : attemptTrio());
             }
-            else if (key === "RIGHT") {
-                if (isCl && colClassic < COLS - 1) { colClassic++; updateCursor(); }
-                else if (!isCl && colDuo < COLS - 1) { colDuo++; updateCursor(); }
-            }
-            else { addLetter(key); playSfx('type'); }
-        }
-
-        function addLetter(letter) {
-            if (currentMode === 'classic') {
-                let c = document.getElementById(`cell-classic-${rowClassic}-${colClassic}`);
-                c.innerText = letter; c.classList.add("filled");
-                guessLettersClassic[colClassic] = letter;
-                if (colClassic < COLS - 1) colClassic++;
-            } else {
-                guessLettersDuo[colDuo] = letter;
-                for (let b = 0; b < 2; b++) {
-                    if (!boardsSolvedDuo[b]) {
-                        let c = document.getElementById(`cell-duo-${b}-${rowDuo}-${colDuo}`);
-                        c.innerText = letter; c.classList.add("filled");
-                    }
+            else if (key === "DEL") {
+                if (currentGuess.length > 0) {
+                    currentGuess = currentGuess.slice(0, -1);
+                    renderTypingRow();
+                    playSfx('delete');
                 }
-                if (colDuo < COLS - 1) colDuo++;
             }
-            updateCursor();
-        }
-
-        function deleteLetter() {
-            if (currentMode === 'classic') {
-                let targetCol = guessLettersClassic[colClassic] !== "" ? colClassic : Math.max(0, colClassic - 1);
-                guessLettersClassic[targetCol] = "";
-                let cell = document.getElementById(`cell-classic-${rowClassic}-${targetCol}`);
-                cell.innerText = ""; cell.classList.remove("filled");
-                colClassic = targetCol;
-            } else {
-                let targetCol = guessLettersDuo[colDuo] !== "" ? colDuo : Math.max(0, colDuo - 1);
-                guessLettersDuo[targetCol] = "";
-                for (let b = 0; b < 2; b++) {
-                    if (!boardsSolvedDuo[b]) {
-                        let cell = document.getElementById(`cell-duo-${b}-${rowDuo}-${targetCol}`);
-                        cell.innerText = ""; cell.classList.remove("filled");
-                    }
+            else {
+                // Capped at 12 to prevent screen break, reasonable for game terms
+                if (currentGuess.length < 12) {
+                    currentGuess += key;
+                    renderTypingRow();
+                    playSfx('type');
                 }
-                colDuo = targetCol;
             }
-            updateCursor();
         }
 
         // ==============================================================================
-        // LÓGICA DE PROCESSAMENTO E MEMÓRIA
+        // LÓGICA DE AVALIAÇÃO LETROSO STYLE
         // ==============================================================================
+
+        // Função universal para descobrir as cores
+        function evaluateGuess(guess, secret) {
+            let guessArr = guess.split("");
+            let secretArr = secret.split("");
+            let statuses = new Array(guessArr.length).fill("absent");
+
+            // Acertos Verdes
+            for (let i = 0; i < guessArr.length; i++) {
+                if (i < secretArr.length && guessArr[i] === secretArr[i]) {
+                    statuses[i] = "correct";
+                    secretArr[i] = null;
+                    guessArr[i] = null;
+                }
+            }
+            // Acertos Amarelos
+            for (let i = 0; i < guessArr.length; i++) {
+                if (guessArr[i] !== null) {
+                    let idx = secretArr.indexOf(guessArr[i]);
+                    if (idx !== -1) {
+                        statuses[i] = "present";
+                        secretArr[idx] = null;
+                    }
+                }
+            }
+            return statuses;
+        }
+
+        // CLÁSSICO
         function attemptClassic() {
-            let guess = guessLettersClassic.join("");
-            if (guess.length !== COLS) { showMessage("Complete a palavra!"); playSfx('error'); return; }
-            if (!VALID_WORDS.includes(guess)) { showMessage("Palavra não encontrada!"); playSfx('error'); return; }
-
-            historyClassic.push(guess);
-            saveGameState();
-            processGuessClassic(guess, false);
+            let guess = currentGuess;
+            historyClassic.push(guess); saveGameState(); processGuessClassic(guess, false);
         }
 
         function processGuessClassic(guess, isReplay) {
-            let rowCells = [];
-            for (let c = 0; c < COLS; c++) rowCells.push(document.getElementById(`cell-classic-${rowClassic}-${c}`));
+            let board = document.getElementById("classic-board");
+            let statuses = evaluateGuess(guess, secretClassic);
 
-            let secretArray = secretClassic.split("");
-            let guessArray = guess.split("");
-            let statuses = new Array(COLS).fill("absent");
-
-            for (let i = 0; i < COLS; i++) {
-                if (guessArray[i] === secretArray[i]) { statuses[i] = "correct"; secretArray[i] = null; guessArray[i] = null; }
+            let row = document.createElement("div"); row.className = "row";
+            for (let i = 0; i < guess.length; i++) {
+                let cell = document.createElement("div"); cell.className = "cell classic-cell";
+                cell.innerText = guess[i];
+                if (isReplay) { cell.classList.add("filled", statuses[i]); updateKeyState(guess[i], statuses[i], 'classic', 0); }
+                else cell.classList.add("filled");
+                row.appendChild(cell);
             }
-            for (let i = 0; i < COLS; i++) {
-                if (guessArray[i] !== null) {
-                    let index = secretArray.indexOf(guessArray[i]);
-                    if (index !== -1) { statuses[i] = "present"; secretArray[index] = null; }
-                }
-            }
-
-            guessArray = guess.split("");
+            board.appendChild(row);
 
             if (!isReplay) {
-                isAnimating = true; updateCursor();
-                for (let i = 0; i < COLS; i++) {
+                isAnimating = true;
+                let cells = row.children;
+                // Velocidade baseada no tamanho da palavra
+                let delay = guess.length > 5 ? 100 : 150;
+
+                for (let i = 0; i < guess.length; i++) {
                     setTimeout(() => {
-                        rowCells[i].innerText = guessArray[i];
-                        rowCells[i].classList.add(statuses[i]);
+                        cells[i].classList.add(statuses[i]);
                         playSfx('flip');
-                        let st = statuses[i];
-                        if (st === 'correct' || (st === 'present' && keyStatesClassic[guessArray[i]] !== 'correct') || (st === 'absent' && keyStatesClassic[guessArray[i]] === 'default')) keyStatesClassic[guessArray[i]] = st;
-                    }, i * 250);
+                        updateKeyState(guess[i], statuses[i], 'classic', 0);
+                    }, i * delay);
                 }
-                setTimeout(() => finalizeClassic(guess, false), COLS * 250 + 100);
+                setTimeout(() => finalizeClassic(guess, false), guess.length * delay + 100);
             } else {
-                for (let i = 0; i < COLS; i++) {
-                    rowCells[i].innerText = guessArray[i]; rowCells[i].classList.add("filled", statuses[i]);
-                    let st = statuses[i];
-                    if (st === 'correct' || (st === 'present' && keyStatesClassic[guessArray[i]] !== 'correct') || (st === 'absent' && keyStatesClassic[guessArray[i]] === 'default')) keyStatesClassic[guessArray[i]] = st;
-                }
                 finalizeClassic(guess, true);
             }
         }
 
         function finalizeClassic(guess, isReplay) {
-            if (!isReplay) { renderKeyboard(); isAnimating = false; }
+            if (!isReplay) { renderKeyboard(); isAnimating = false; currentGuess = ""; renderTypingRow(); }
+            updateAttemptsDisplay();
 
             if (guess === secretClassic) {
-                gameOverClassic = true;
-                if (!isReplay) {
-                    updateStats(true);
-                    updateCursor();
-                    setTimeout(() => showEndScreen(true, [secretClassic], 'Modo Clássico'), 500);
-                }
+                gameOverClassic = true; document.getElementById("classic-board").classList.add("solved");
+                if (!isReplay) { updateStats(true); setTimeout(() => showEndScreen(true, [secretClassic], 'Modo Clássico'), 500); }
                 return;
             }
 
-            rowClassic++;
-            if (!isReplay) { colClassic = 0; guessLettersClassic.fill(""); updateCursor(); }
-
-            if (rowClassic === ROWS_CLASSIC) {
+            if (historyClassic.length >= ROWS_CLASSIC) {
                 gameOverClassic = true;
-                if (!isReplay) {
-                    updateStats(false);
-                    updateCursor();
-                    setTimeout(() => showEndScreen(false, [secretClassic], 'Modo Clássico'), 500);
-                }
+                if (!isReplay) { updateStats(false); setTimeout(() => showEndScreen(false, [secretClassic], 'Modo Clássico'), 500); }
             }
         }
 
+        // DUO
         function attemptDuo() {
-            let guess = guessLettersDuo.join("");
-            if (guess.length !== COLS) { showMessage("Complete a palavra!"); playSfx('error'); return; }
-            if (!VALID_WORDS.includes(guess)) { showMessage("Palavra não encontrada!"); playSfx('error'); return; }
-
-            historyDuo.push(guess);
-            saveGameState();
-            processGuessDuo(guess, false);
+            let guess = currentGuess;
+            historyDuo.push(guess); saveGameState(); processGuessDuo(guess, false);
         }
 
         function processGuessDuo(guess, isReplay) {
             const secrets = [secretDuo1, secretDuo2];
+            let rowElements = [null, null];
             let allStatuses = [null, null];
 
             for (let b = 0; b < 2; b++) {
                 if (boardsSolvedDuo[b]) continue;
-                let secretArray = secrets[b].split(""); let guessArray = guess.split("");
-                let statuses = new Array(COLS).fill("absent");
+                allStatuses[b] = evaluateGuess(guess, secrets[b]);
 
-                for (let i = 0; i < COLS; i++) { if (guessArray[i] === secretArray[i]) { statuses[i] = "correct"; secretArray[i] = null; guessArray[i] = null; } }
-                for (let i = 0; i < COLS; i++) {
-                    if (guessArray[i] !== null) {
-                        let index = secretArray.indexOf(guessArray[i]);
-                        if (index !== -1) { statuses[i] = "present"; secretArray[index] = null; }
-                    }
+                let board = document.getElementById(`board-duo-${b}`);
+                let row = document.createElement("div"); row.className = "row";
+                for (let i = 0; i < guess.length; i++) {
+                    let cell = document.createElement("div"); cell.className = "cell duo-cell"; cell.innerText = guess[i];
+                    if (isReplay) { cell.classList.add("filled", allStatuses[b][i]); updateKeyState(guess[i], allStatuses[b][i], 'duo', b); }
+                    else cell.classList.add("filled");
+                    row.appendChild(cell);
                 }
-                allStatuses[b] = statuses;
+                board.appendChild(row);
+                rowElements[b] = row;
             }
 
-            let guessArray = guess.split("");
-
             if (!isReplay) {
-                isAnimating = true; updateCursor();
-                for (let i = 0; i < COLS; i++) {
+                isAnimating = true;
+                let delay = guess.length > 5 ? 100 : 150;
+                for (let i = 0; i < guess.length; i++) {
                     setTimeout(() => {
                         playSfx('flip');
                         for (let b = 0; b < 2; b++) {
-                            if (allStatuses[b]) {
-                                let cell = document.getElementById(`cell-duo-${b}-${rowDuo}-${i}`);
-                                cell.innerText = guessArray[i]; cell.classList.add(allStatuses[b][i]);
-                                let st = allStatuses[b][i];
-                                if (st === 'correct' || (st === 'present' && keyStatesDuo[guessArray[i]][b] !== 'correct') || (st === 'absent' && keyStatesDuo[guessArray[i]][b] === 'default')) keyStatesDuo[guessArray[i]][b] = st;
+                            if (rowElements[b]) {
+                                rowElements[b].children[i].classList.add(allStatuses[b][i]);
+                                updateKeyState(guess[i], allStatuses[b][i], 'duo', b);
                             }
                         }
-                    }, i * 250);
+                    }, i * delay);
                 }
-                setTimeout(() => finalizeDuo(guess, false), COLS * 250 + 100);
+                setTimeout(() => finalizeDuo(guess, false), guess.length * delay + 100);
             } else {
-                for (let i = 0; i < COLS; i++) {
-                    for (let b = 0; b < 2; b++) {
-                        if (allStatuses[b]) {
-                            let cell = document.getElementById(`cell-duo-${b}-${rowDuo}-${i}`);
-                            cell.innerText = guessArray[i]; cell.classList.add("filled", allStatuses[b][i]);
-                            let st = allStatuses[b][i];
-                            if (st === 'correct' || (st === 'present' && keyStatesDuo[guessArray[i]][b] !== 'correct') || (st === 'absent' && keyStatesDuo[guessArray[i]][b] === 'default')) keyStatesDuo[guessArray[i]][b] = st;
-                        }
-                    }
-                }
                 finalizeDuo(guess, true);
             }
         }
@@ -1057,34 +1062,92 @@
                 if (!boardsSolvedDuo[b] && guess === secrets[b]) { boardsSolvedDuo[b] = true; document.getElementById(`board-duo-${b}`).classList.add("solved"); }
             }
 
-            if (!isReplay) { renderKeyboard(); isAnimating = false; }
+            if (!isReplay) { renderKeyboard(); isAnimating = false; currentGuess = ""; renderTypingRow(); }
+            updateAttemptsDisplay();
 
             if (boardsSolvedDuo[0] && boardsSolvedDuo[1]) {
                 gameOverDuo = true;
-                if (!isReplay) {
-                    updateStats(true);
-                    updateCursor();
-                    setTimeout(() => showEndScreen(true, secrets, 'Modo Duo'), 500);
-                }
+                if (!isReplay) { updateStats(true); setTimeout(() => showEndScreen(true, secrets, 'Modo Duo'), 500); }
                 return;
             }
 
-            rowDuo++;
-            if (!isReplay) { colDuo = 0; guessLettersDuo.fill(""); updateCursor(); }
-
-            if (rowDuo === ROWS_DUO) {
+            if (historyDuo.length >= ROWS_DUO) {
                 gameOverDuo = true;
-                if (!isReplay) {
-                    updateStats(false);
-                    updateCursor();
-                    setTimeout(() => showEndScreen(false, secrets, 'Modo Duo'), 500);
+                if (!isReplay) { updateStats(false); setTimeout(() => showEndScreen(false, secrets, 'Modo Duo'), 500); }
+            }
+        }
+
+        // TRIO
+        function attemptTrio() {
+            let guess = currentGuess;
+            historyTrio.push(guess); saveGameState(); processGuessTrio(guess, false);
+        }
+
+        function processGuessTrio(guess, isReplay) {
+            const secrets = [secretTrio1, secretTrio2, secretTrio3];
+            let rowElements = [null, null, null];
+            let allStatuses = [null, null, null];
+
+            for (let b = 0; b < 3; b++) {
+                if (boardsSolvedTrio[b]) continue;
+                allStatuses[b] = evaluateGuess(guess, secrets[b]);
+
+                let board = document.getElementById(`board-trio-${b}`);
+                let row = document.createElement("div"); row.className = "row";
+                for (let i = 0; i < guess.length; i++) {
+                    let cell = document.createElement("div"); cell.className = "cell trio-cell"; cell.innerText = guess[i];
+                    if (isReplay) { cell.classList.add("filled", allStatuses[b][i]); updateKeyState(guess[i], allStatuses[b][i], 'trio', b); }
+                    else cell.classList.add("filled");
+                    row.appendChild(cell);
                 }
+                board.appendChild(row);
+                rowElements[b] = row;
+            }
+
+            if (!isReplay) {
+                isAnimating = true;
+                let delay = guess.length > 5 ? 100 : 150;
+                for (let i = 0; i < guess.length; i++) {
+                    setTimeout(() => {
+                        playSfx('flip');
+                        for (let b = 0; b < 3; b++) {
+                            if (rowElements[b]) {
+                                rowElements[b].children[i].classList.add(allStatuses[b][i]);
+                                updateKeyState(guess[i], allStatuses[b][i], 'trio', b);
+                            }
+                        }
+                    }, i * delay);
+                }
+                setTimeout(() => finalizeTrio(guess, false), guess.length * delay + 100);
+            } else {
+                finalizeTrio(guess, true);
+            }
+        }
+
+        function finalizeTrio(guess, isReplay) {
+            const secrets = [secretTrio1, secretTrio2, secretTrio3];
+            for (let b = 0; b < 3; b++) {
+                if (!boardsSolvedTrio[b] && guess === secrets[b]) { boardsSolvedTrio[b] = true; document.getElementById(`board-trio-${b}`).classList.add("solved"); }
+            }
+
+            if (!isReplay) { renderKeyboard(); isAnimating = false; currentGuess = ""; renderTypingRow(); }
+            updateAttemptsDisplay();
+
+            if (boardsSolvedTrio[0] && boardsSolvedTrio[1] && boardsSolvedTrio[2]) {
+                gameOverTrio = true;
+                if (!isReplay) { updateStats(true); setTimeout(() => showEndScreen(true, secrets, 'Modo Trio'), 500); }
+                return;
+            }
+
+            if (historyTrio.length >= ROWS_TRIO) {
+                gameOverTrio = true;
+                if (!isReplay) { updateStats(false); setTimeout(() => showEndScreen(false, secrets, 'Modo Trio'), 500); }
             }
         }
 
         function showMessage(msg) {
             messageDisplay.innerText = msg;
-            setTimeout(() => { messageDisplay.innerText = ""; }, 2000);
+            setTimeout(() => { messageDisplay.innerText = ""; }, 2500);
         }
 
         // ==============================================================================
@@ -1099,7 +1162,7 @@
             initAudio();
             document.getElementById("tutorialModal").style.opacity = "0";
             setTimeout(() => document.getElementById("tutorialModal").style.display = "none", 300);
-            localStorage.setItem("games_modos_tutorial_final", "true");
+            localStorage.setItem("games_modos_tutorial_letroso", "true");
         }
 
         function openRanking() {
@@ -1114,7 +1177,7 @@
         }
 
         function showEndScreen(win, wordsArr, modeName) {
-            if (win) { playVictorySound(); document.getElementById("end-title").innerText = `Vitória no ${modeName}!`; }
+            if (win) { playVictorySound(); document.getElementById("end-title").innerText = `🎵 Vitória no ${modeName}!`; }
             else { document.getElementById("end-title").innerText = `❌ Fim de Jogo no ${modeName}!`; }
 
             document.getElementById("end-desc").innerHTML = `Resposta(s):<br>${wordsArr.join(" & ")}`;
@@ -1125,7 +1188,7 @@
         // Boot do Jogo
         initUI();
 
-        if (!localStorage.getItem("games_modos_tutorial_final")) {
+        if (!localStorage.getItem("games_modos_tutorial_letroso")) {
             setTimeout(openTutorial, 500);
         }
 
